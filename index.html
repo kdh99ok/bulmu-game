@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BULMU - 친구들과 함께하는 게임 플랫폼</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-dark: #1e1b4b;
+            --bg-darker: #1a1640;
+            --bg-light: #2e2a5f;
+            --text-primary: #ffffff;
+            --text-secondary: #a8a29e;
+            --border-color: #4c4976;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: white;
+            border: 2px solid var(--border-color);
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            background: var(--bg-light);
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-small:hover {
+            background: var(--border-color);
+        }
+
+        .btn-large {
+            padding: 16px 48px;
+            font-size: 18px;
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #loading-screen {
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 64px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #login-screen {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            text-align: center;
+            padding: 48px;
+            background: var(--bg-light);
+            border-radius: 24px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 450px;
+            width: 90%;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 32px;
+        }
+
+        .login-box {
+            margin-bottom: 24px;
+        }
+
+        #nickname-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-dark);
+            color: white;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        #nickname-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .login-info {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        #lobby-screen {
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .logo-small {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-nickname {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .user-level {
+            background: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .exp-bar {
+            width: 150px;
+            height: 8px;
+            background: var(--bg-darker);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .exp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+            transition: width 0.5s;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-money {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--warning-color);
+        }
+
+        .lobby-content {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr;
+            gap: 24px;
+            padding: 24px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .game-selection h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .game-card {
+            background: var(--bg-light);
+            padding: 24px;
+            border-radius: 16px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .game-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .game-card h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .game-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .notice-box, .mission-box, .chat-box {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid var(--border-color);
+        }
+
+        .notice-box h4, .mission-box h4, .chat-box h4 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+        }
+
+        .notice-box p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .mission-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mission-text {
+            font-size: 14px;
+        }
+
+        .mission-progress {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .chat-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 300px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            max-height: 300px;
+        }
+
+        .chat-message {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .chat-nickname {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+
+        .my-message {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        #chat-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ranking-box, .profile-box {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid var(--border-color);
+        }
+
+        .ranking-box h4, .profile-box h4 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--warning-color);
+        }
+
+        .ranking-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .rank {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-color);
+            border-radius: 50%;
+            font-weight: 700;
+        }
+
+        .player-name {
+            flex: 1;
+        }
+
+        .score {
+            font-weight: 600;
+            color: var(--warning-color);
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        #game-screen {
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--warning-color);
+        }
+
+        .round-info {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .quiz-game, .typing-game, .draw-game, .bingo-game {
+            width: 100%;
+        }
+
+        .quiz-content, .typing-content, .bingo-content {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        .question-box {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .category {
+            display: inline-block;
+            padding: 6px 16px;
+            background: var(--primary-color);
+            border-radius: 20px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .question-text {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .answer-btn {
+            padding: 20px;
+            font-size: 18px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background: var(--border-color);
+            transform: translateY(-2px);
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn.correct {
+            background: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .answer-btn.wrong {
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .target-text {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            padding: 32px;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .typing-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .typing-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .draw-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .canvas-container {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        #draw-canvas {
+            background: white;
+            border-radius: 8px;
+            display: block;
+            cursor: crosshair;
+            width: 100%;
+        }
+
+        .draw-tools {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        #color-picker {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #brush-size {
+            flex: 1;
+        }
+
+        .chat-guess {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .guess-messages {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            min-height: 300px;
+        }
+
+        #guess-input {
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .bingo-game {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bingo-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .bingo-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--bg-dark);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .bingo-cell:hover:not(.selected) {
+            background: var(--border-color);
+            transform: scale(1.05);
+        }
+
+        .bingo-cell.selected {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        #result-screen {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-container {
+            background: var(--bg-light);
+            border-radius: 24px;
+            border: 2px solid var(--border-color);
+            padding: 48px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .result-container h2 {
+            font-size: 32px;
+            margin-bottom: 32px;
+        }
+
+        .result-content {
+            margin-bottom: 32px;
+        }
+
+        .result-rank {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+
+        .result-rank.first-place {
+            animation: bounce 1s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .result-score {
+            margin-bottom: 24px;
+        }
+
+        .score-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .score-value {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .result-rewards h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .reward-item {
+            padding: 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        @media (max-width: 1200px) {
+            .lobby-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .game-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .draw-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 로딩 화면 -->
+        <div id="loading-screen" class="screen active">
+            <div class="loading-content">
+                <h1 class="logo">🎮 BULMU</h1>
+                <div class="loading-spinner"></div>
+                <p>로딩중...</p>
+            </div>
+        </div>
+
+        <!-- 로그인 화면 -->
+        <div id="login-screen" class="screen">
+            <div class="login-container">
+                <h1 class="logo">🎮 BULMU</h1>
+                <p class="subtitle">친구들과 함께하는 게임 플랫폼</p>
+                
+                <div class="login-box">
+                    <input type="text" id="nickname-input" placeholder="닉네임을 입력하세요" maxlength="10">
+                    <button id="login-btn" class="btn-primary">게임 시작</button>
+                </div>
+                
+                <div class="login-info">
+                    <p>💡 닉네임은 2~10자로 입력해주세요</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 로비 화면 -->
+        <div id="lobby-screen" class="screen">
+            <header class="header">
+                <div class="header-left">
+                    <h2 class="logo-small">🎮 BULMU</h2>
+                </div>
+                <div class="header-center">
+                    <div class="user-info">
+                        <span class="user-nickname">닉네임</span>
+                        <span class="user-level">Lv. 1</span>
+                        <div class="exp-bar">
+                            <div class="exp-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-money">💰 <span id="user-coins">0</span></div>
+                    <button id="logout-btn" class="btn-small">로그아웃</button>
+                </div>
+            </header>
+
+            <div class="lobby-content">
+                <div class="game-selection">
+                    <h3>🎯 게임 선택</h3>
+                    <div class="game-grid">
+                        <div class="game-card" data-game="speedQuiz">
+                            <div class="game-icon">📝</div>
+                            <h4>스피드 퀴즈</h4>
+                            <p>빠르게 정답을 맞춰라!</p>
+                        </div>
+
+                        <div class="game-card" data-game="typingRace">
+                            <div class="game-icon">⌨️</div>
+                            <h4>타이핑 레이스</h4>
+                            <p>최고 속도를 겨뤄라!</p>
+                        </div>
+
+                        <div class="game-card" data-game="drawGuess">
+                            <div class="game-icon">🎨</div>
+                            <h4>그림 맞추기</h4>
+                            <p>그림으로 소통하기!</p>
+                        </div>
+
+                        <div class="game-card" data-game="bingo">
+                            <div class="game-icon">🎲</div>
+                            <h4>빙고 배틀</h4>
+                            <p>5줄을 완성하라!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="center-panel">
+                    <div class="notice-box">
+                        <h4>📢 공지사항</h4>
+                        <p>BULMU 게임 플랫폼에 오신 것을 환영합니다!</p>
+                    </div>
+
+                    <div class="mission-box">
+                        <h4>📅 일일 미션</h4>
+                        <div id="daily-missions">
+                            <div class="mission-item">
+                                <span class="mission-text">게임 3판 플레이</span>
+                                <span class="mission-progress">0/3</span>
+                            </div>
+                            <div class="mission-item">
+                                <span class="mission-text">게임 1승 달성</span>
+                                <span class="mission-progress">0/1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-box">
+                        <h4>💬 로비 채팅</h4>
+                        <div id="chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." maxlength="100">
+                            <button id="chat-send" class="btn-small">전송</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="ranking-box">
+                        <h4>🏆 랭킹</h4>
+                        <div id="ranking-list" class="ranking-list">
+                            <div class="ranking-item">
+                                <span class="rank">1</span>
+                                <span class="player-name">플레이어1</span>
+                                <span class="score">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-box">
+                        <h4>👤 내 프로필</h4>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">게임 수</span>
+                                <span class="stat-value" id="total-games">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">승리</span>
+                                <span class="stat-value" id="total-wins">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">승률</span>
+                                <span class="stat-value" id="win-rate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="game-screen" class="screen">
+            <div id="game-container"></div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <h2>🎉 게임 결과</h2>
+                <div id="result-content" class="result-content"></div>
+                <div class="result-buttons">
+                    <button id="play-again-btn" class="btn-primary">다시 하기</button>
+                    <button id="to-lobby-btn" class="btn-secondary">로비로</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, get, update, onValue, push, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDiXH81fQ5poZPcEnvnv_fanPBtPruGUNA",
+          authDomain: "bbulmu-416ff.firebaseapp.com",
+          databaseURL: "https://bbulmu-416ff-default-rtdb.firebaseio.com",
+          projectId: "bbulmu-416ff",
+          storageBucket: "bbulmu-416ff.firebasestorage.app",
+          messagingSenderId: "693898015160",
+          appId: "1:693898015160:web:9c16b7595e4859e1275f4d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        const AppState = {
+            currentUser: null,
+            currentScreen: 'loading'
+        };
+
+        function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(`${screenName}-screen`).classList.add('active');
+            AppState.currentScreen = screenName;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎮 BULMU 게임 플랫폼 시작!');
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    checkUserProfile(user.uid);
+                } else {
+                    showScreen('login');
+                }
+            });
+            
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            
+            document.getElementById('nickname-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            
+            document.querySelectorAll('.game-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const gameType = card.dataset.game;
+                    joinGame(gameType);
+                });
+            });
+            
+            document.getElementById('chat-send').addEventListener('click', sendChatMessage);
+            document.getElementById('chat-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+            
+            document.getElementById('play-again-btn').addEventListener('click', () => showScreen('lobby'));
+            document.getElementById('to-lobby-btn').addEventListener('click', () => showScreen('lobby'));
+        });
+
+        async function handleLogin() {
+            const nicknameInput = document.getElementById('nickname-input');
+            const nickname = nicknameInput.value.trim();
+            
+            if (nickname.length < 2 || nickname.length > 10) {
+                alert('닉네임은 2~10자로 입력해주세요!');
+                return;
+            }
+            
+            try {
+                const userCredential = await signInAnonymously(auth);
+                const userId = userCredential.user.uid;
+                
+                await createUserProfile(userId, nickname);
+                
+                AppState.currentUser = {
+                    uid: userId,
+                    nickname: nickname
+                };
+                
+                showScreen('lobby');
+                initializeLobby();
+                
+            } catch (error) {
+                console.error('로그인 오류:', error);
+                alert('로그인에 실패했습니다: ' + error.message);
+            }
+        }
+
+        async function createUserProfile(userId, nickname) {
+            const userRef = ref(database, `users/${userId}`);
+            const snapshot = await get(userRef);
+            
+            if (!snapshot.exists()) {
+                await set(userRef, {
+                    profile: {
+                        nickname: nickname,
+                        level: 1,
+                        exp: 0,
+                        totalScore: 0,
+                        gameMoney: 1000,
+                        joinDate: Date.now()
+                    },
+                    stats: {
+                        gamesPlayed: 0,
+                        gamesWon: 0
+                    }
+                });
+            } else {
+                await update(userRef, {
+                    'profile/nickname': nickname,
+                    lastLogin: Date.now()
+                });
+            }
+        }
+
+        async function checkUserProfile(userId) {
+            const userRef = ref(database, `users/${userId}`);
+            const snapshot = await get(userRef);
+            
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                AppState.currentUser = {
+                    uid: userId,
+                    nickname: userData.profile.nickname,
+                    ...userData
+                };
+                showScreen('lobby');
+                initializeLobby();
+            } else {
+                showScreen('login');
+            }
+        }
+
+        function initializeLobby() {
+            updateUserInfo();
+            loadRanking();
+            listenToChatMessages();
+            loadDailyMissions();
+        }
+
+        async function updateUserInfo() {
+            if (!AppState.currentUser) return;
+            
+            const userRef = ref(database, `users/${AppState.currentUser.uid}`);
+            const snapshot = await get(userRef);
+            
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                
+                document.querySelector('.user-nickname').textContent = userData.profile.nickname;
+                document.querySelector('.user-level').textContent = `Lv. ${userData.profile.level}`;
+                document.getElementById('user-coins').textContent = userData.profile.gameMoney || 0;
+                
+                const expNeeded = Math.floor(100 * userData.profile.level * 1.2);
+                const expPercent = (userData.profile.exp / expNeeded) * 100;
+                document.querySelector('.exp-fill').style.width = `${expPercent}%`;
+                
+                document.getElementById('total-games').textContent = userData.stats.gamesPlayed || 0;
+                document.getElementById('total-wins').textContent = userData.stats.gamesWon || 0;
+                document.getElementById('win-rate').textContent = 
+                    userData.stats.gamesPlayed > 0 
+                        ? `${Math.round((userData.stats.gamesWon / userData.stats.gamesPlayed) * 100)}%`
+                        : '0%';
+            }
+        }
+
+        async function loadRanking() {
+            const rankingList = document.getElementById('ranking-list');
+            rankingList.innerHTML = '<div style="text-align:center;padding:20px;color:#a8a29e;">로딩중...</div>';
+            
+            try {
+                const usersRef = ref(database, 'users');
+                const snapshot = await get(usersRef);
+                
+                if (snapshot.exists()) {
+                    const users = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const userData = childSnapshot.val();
+                        users.push({
+                            uid: childSnapshot.key,
+                            nickname: userData.profile.nickname,
+                            score: userData.profile.totalScore || 0
+                        });
+                    });
+                    
+                    users.sort((a, b) => b.score - a.score);
+                    const topUsers = users.slice(0, 10);
+                    
+                    rankingList.innerHTML = '';
+                    topUsers.forEach((user, index) => {
+                        const rankItem = document.createElement('div');
+                        rankItem.className = 'ranking-item';
+                        rankItem.innerHTML = `
+                            <span class="rank">${index + 1}</span>
+                            <span class="player-name">${user.nickname}</span>
+                            <span class="score">${user.score.toLocaleString()}</span>
+                        `;
+                        rankingList.appendChild(rankItem);
+                    });
+                    
+                    if (topUsers.length === 0) {
+                        rankingList.innerHTML = '<div style="text-align:center;padding:20px;color:#a8a29e;">아직 랭킹 데이터가 없습니다</div>';
+                    }
+                } else {
+                    rankingList.innerHTML = '<div style="text-align:center;padding:20px;color:#a8a29e;">아직 랭킹 데이터가 없습니다</div>';
+                }
+            } catch (error) {
+                console.error('랭킹 로드 오류:', error);
+                rankingList.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;">랭킹을 불러올 수 없습니다</div>';
+            }
+        }
+
+        function listenToChatMessages() {
+            const chatRef = ref(database, 'chat/lobby');
+            const messagesDiv = document.getElementById('chat-messages');
+            
+            onValue(chatRef, (snapshot) => {
+                messagesDiv.innerHTML = '';
+                
+                if (snapshot.exists()) {
+                    const messages = [];
+                    snapshot.forEach((childSnapshot) => {
+                        messages.push({
+                            id: childSnapshot.key,
+                            ...childSnapshot.val()
+                        });
+                    });
+                    
+                    const recentMessages = messages.slice(-50);
+                    
+                    recentMessages.forEach(msg => {
+                        const messageEl = document.createElement('div');
+                        messageEl.className = 'chat-message';
+                        
+                        const isMyMessage = AppState.currentUser && msg.userId === AppState.currentUser.uid;
+                        if (isMyMessage) {
+                            messageEl.classList.add('my-message');
+                        }
+                        
+                        const div = document.createElement('div');
+                        div.textContent = msg.message;
+                        const escapedMessage = div.innerHTML;
+                        
+                        messageEl.innerHTML = `
+                            <span class="chat-nickname">${msg.nickname}:</span>
+                            <span class="chat-text">${escapedMessage}</span>
+                        `;
+                        messagesDiv.appendChild(messageEl);
+                    });
+                    
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+            });
+        }
+
+        async function sendChatMessage() {
+            const chatInput = document.getElementById('chat-input');
+            const message = chatInput.value.trim();
+            
+            if (!message || !AppState.currentUser) return;
+            
+            try {
+                const chatRef = ref(database, 'chat/lobby');
+                await push(chatRef, {
+                    userId: AppState.currentUser.uid,
+                    nickname: AppState.currentUser.nickname,
+                    message: message,
+                    timestamp: Date.now()
+                });
+                
+                chatInput.value = '';
+                
+            } catch (error) {
+                console.error('채팅 전송 오류:', error);
+            }
+        }
+
+        async function loadDailyMissions() {
+            if (!AppState.currentUser) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const missionRef = ref(database, `users/${AppState.currentUser.uid}/missions/${today}`);
+            
+            onValue(missionRef, (snapshot) => {
+                const missions = snapshot.val() || {
+                    gamesPlayed: 0,
+                    gamesWon: 0
+                };
+                
+                const missionItems = document.querySelectorAll('.mission-item');
+                missionItems[0].querySelector('.mission-progress').textContent = `${missions.gamesPlayed}/3`;
+                missionItems[1].querySelector('.mission-progress').textContent = `${missions.gamesWon}/1`;
+            });
+        }
+
+        async function updateMissionProgress(type, amount) {
+            if (!AppState.currentUser) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const missionRef = ref(database, `users/${AppState.currentUser.uid}/missions/${today}`);
+            
+            const snapshot = await get(missionRef);
+            const currentMissions = snapshot.val() || {
+                gamesPlayed: 0,
+                gamesWon: 0
+            };
+            
+            if (type === 'game') {
+                currentMissions.gamesPlayed += amount;
+            } else if (type === 'win') {
+                currentMissions.gamesWon += amount;
+            }
+            
+            await set(missionRef, currentMissions);
+        }
+
+        function joinGame(gameType) {
+            showScreen('game');
+            initializeGame(gameType);
+        }
+
+        function initializeGame(gameType) {
+            const container = document.getElementById('game-container');
+            container.innerHTML = '';
+
+            switch (gameType) {
+                case 'speedQuiz':
+                    initSpeedQuiz();
+                    break;
+                case 'typingRace':
+                    initTypingRace();
+                    break;
+                case 'drawGuess':
+                    initDrawGuess();
+                    break;
+                case 'bingo':
+                    initBingo();
+                    break;
+            }
+        }
+
+        function initSpeedQuiz() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="quiz-game">
+                    <div class="game-header">
+                        <div class="timer">⏱️ <span id="timer">20</span></div>
+                        <div class="round-info">문제 <span id="current-question">1</span> / 10</div>
+                        <div class="score">점수: <span id="current-score">0</span></div>
+                    </div>
+                    
+                    <div class="quiz-content">
+                        <div class="question-box">
+                            <div class="category" id="category">일반상식</div>
+                            <h2 id="question" class="question-text">문제를 불러오는 중...</h2>
+                        </div>
+                        
+                        <div class="answers-grid" id="answers-grid"></div>
+                    </div>
+                </div>
+            `;
+
+            const quizQuestions = [
+                { category: '일반상식', question: '대한민국의 수도는?', answers: ['서울', '부산', '인천', '대전'], correct: 0 },
+                { category: 'K-POP', question: 'BTS의 리더는?', answers: ['RM', '진', '슈가', '제이홉'], correct: 0 },
+                { category: '과학', question: '물의 화학식은?', answers: ['H2O', 'CO2', 'O2', 'N2'], correct: 0 },
+                { category: '역사', question: '한글을 만든 조선의 왕은?', answers: ['세종대왕', '태조', '정조', '선조'], correct: 0 },
+                { category: '영화', question: '\'기생충\'의 감독은?', answers: ['봉준호', '박찬욱', '이창동', '김지운'], correct: 0 },
+                { category: '지리', question: '가장 큰 대륙은?', answers: ['아시아', '아프리카', '유럽', '남아메리카'], correct: 0 },
+                { category: '스포츠', question: '축구 한 팀의 선수 수는?', answers: ['11명', '9명', '10명', '12명'], correct: 0 },
+                { category: '과학', question: '태양계에서 가장 큰 행성은?', answers: ['목성', '토성', '지구', '화성'], correct: 0 },
+                { category: '일반상식', question: '1년은 며칠?', answers: ['365일', '360일', '366일', '364일'], correct: 0 },
+                { category: 'K-POP', question: 'BLACKPINK의 멤버가 아닌 사람은?', answers: ['아이린', '지수', '제니', '로제'], correct: 0 }
+            ];
+
+            let currentQuestion = 0;
+            let score = 0;
+            let timeLeft = 20;
+            let timerInterval = null;
+            let answerStartTime = Date.now();
+
+            const showQuestion = (index) => {
+                if (index >= quizQuestions.length) {
+                    endGame(score);
+                    return;
+                }
+
+                const q = quizQuestions[index];
+                document.getElementById('category').textContent = q.category;
+                document.getElementById('question').textContent = q.question;
+                document.getElementById('current-question').textContent = index + 1;
+
+                const answersGrid = document.getElementById('answers-grid');
+                answersGrid.innerHTML = '';
+
+                q.answers.forEach((answer, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'answer-btn';
+                    btn.textContent = answer;
+                    btn.onclick = () => selectAnswer(i, q.correct);
+                    answersGrid.appendChild(btn);
+                });
+
+                timeLeft = 20;
+                answerStartTime = Date.now();
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('timer').textContent = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        nextQuestion();
+                    }
+                }, 1000);
+            };
+
+            const selectAnswer = (selected, correct) => {
+                clearInterval(timerInterval);
+
+                const answerBtns = document.querySelectorAll('.answer-btn');
+                answerBtns.forEach((btn, i) => {
+                    btn.disabled = true;
+                    if (i === correct) {
+                        btn.classList.add('correct');
+                    } else if (i === selected) {
+                        btn.classList.add('wrong');
+                    }
+                });
+
+                if (selected === correct) {
+                    const responseTime = (Date.now() - answerStartTime) / 1000;
+                    const points = Math.max(0, Math.floor(1000 - responseTime * 50));
+                    score += points;
+                    document.getElementById('current-score').textContent = score;
+                }
+
+                setTimeout(() => {
+                    nextQuestion();
+                }, 1500);
+            };
+
+            const nextQuestion = () => {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            };
+
+            showQuestion(0);
+        }
+
+        function initTypingRace() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="typing-game">
+                    <div class="game-header">
+                        <div class="round-info">라운드 <span id="current-round">1</span> / 5</div>
+                        <div class="score">점수: <span id="current-score">0</span></div>
+                    </div>
+                    
+                    <div class="typing-content">
+                        <div class="target-text" id="target-text">준비 중...</div>
+                        <input type="text" id="typing-input" class="typing-input" 
+                               placeholder="여기에 입력하세요..." autocomplete="off">
+                        
+                        <div class="typing-stats">
+                            <div class="stat">정확도: <span id="accuracy">100%</span></div>
+                            <div class="stat">속도: <span id="speed">0 타/분</span></div>
+                            <div class="stat">오타: <span id="errors">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const sentences = [
+                '안녕하세요 여러분 타이핑 게임에 오신 것을 환영합니다',
+                '빠르고 정확한 타이핑이 승리의 열쇠입니다',
+                '집중력을 발휘해서 최고 기록에 도전해보세요',
+                '친구들과 함께 즐거운 시간 보내세요',
+                '마지막 라운드입니다 최선을 다해주세요'
+            ];
+
+            let currentRound = 0;
+            let score = 0;
+            let errors = 0;
+            let startTime = null;
+
+            const startRound = (round) => {
+                if (round >= sentences.length) {
+                    endGame(score);
+                    return;
+                }
+
+                const targetText = sentences[round];
+                document.getElementById('target-text').textContent = targetText;
+                document.getElementById('current-round').textContent = round + 1;
+
+                const input = document.getElementById('typing-input');
+                input.value = '';
+                input.disabled = false;
+                input.focus();
+                errors = 0;
+                startTime = Date.now();
+
+                document.getElementById('errors').textContent = '0';
+                document.getElementById('accuracy').textContent = '100%';
+                document.getElementById('speed').textContent = '0 타/분';
+
+                input.oninput = (e) => {
+                    const typed = e.target.value;
+
+                    let currentErrors = 0;
+                    for (let i = 0; i < typed.length; i++) {
+                        if (typed[i] !== targetText[i]) {
+                            currentErrors++;
+                        }
+                    }
+                    errors = currentErrors;
+                    document.getElementById('errors').textContent = errors;
+
+                    const accuracy = typed.length > 0 
+                        ? Math.round(((typed.length - errors) / typed.length) * 100)
+                        : 100;
+                    document.getElementById('accuracy').textContent = accuracy + '%';
+
+                    const elapsedSec = (Date.now() - startTime) / 1000;
+                    const speed = elapsedSec > 0 
+                        ? Math.round((typed.length / elapsedSec) * 60)
+                        : 0;
+                    document.getElementById('speed').textContent = speed + ' 타/분';
+
+                    if (typed === targetText) {
+                        input.disabled = true;
+                        
+                        const timeTaken = (Date.now() - startTime) / 1000;
+                        let points = Math.floor(10000 / timeTaken);
+                        points -= errors * 500;
+                        if (errors === 0) points += 2000;
+                        score += Math.max(0, points);
+                        
+                        document.getElementById('current-score').textContent = score;
+
+                        setTimeout(() => {
+                            currentRound++;
+                            startRound(currentRound);
+                        }, 1000);
+                    }
+                };
+            };
+
+            setTimeout(() => {
+                startRound(0);
+            }, 1000);
+        }
+
+        function initDrawGuess() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="draw-game">
+                    <div class="game-header">
+                        <div class="timer">⏱️ <span id="timer">90</span></div>
+                        <div class="word-hint" id="word-hint">그림을 그려주세요</div>
+                        <div class="score">점수: <span id="current-score">0</span></div>
+                    </div>
+                    
+                    <div class="draw-content">
+                        <div class="canvas-container">
+                            <canvas id="draw-canvas" width="600" height="400"></canvas>
+                            <div class="draw-tools">
+                                <input type="color" id="color-picker" value="#000000">
+                                <button id="clear-btn" class="btn-small">지우기</button>
+                                <input type="range" id="brush-size" min="1" max="20" value="3">
+                            </div>
+                        </div>
+                        
+                        <div class="chat-guess">
+                            <div id="guess-messages" class="guess-messages"></div>
+                            <input type="text" id="guess-input" placeholder="정답을 입력하세요..." maxlength="20">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const canvas = document.getElementById('draw-canvas');
+            const ctx = canvas.getContext('2d');
+            const colorPicker = document.getElementById('color-picker');
+            const brushSize = document.getElementById('brush-size');
+            const clearBtn = document.getElementById('clear-btn');
+
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                ctx.strokeStyle = colorPicker.value;
+                ctx.lineWidth = brushSize.value;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            });
+
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseout', () => isDrawing = false);
+
+            clearBtn.onclick = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            };
+
+            const words = ['사과', '자동차', '집', '나무', '고양이'];
+            const currentWord = words[Math.floor(Math.random() * words.length)];
+            document.getElementById('word-hint').textContent = `그려야 할 단어: ${currentWord}`;
+
+            let timeLeft = 90;
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame(0);
+                }
+            }, 1000);
+
+            const guessInput = document.getElementById('guess-input');
+            guessInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const guess = guessInput.value.trim();
+                    if (guess === currentWord) {
+                        clearInterval(timerInterval);
+                        const score = Math.max(0, 1000 - (90 - timeLeft) * 10);
+                        endGame(score);
+                    }
+                    guessInput.value = '';
+                }
+            });
+        }
+
+        function initBingo() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="bingo-game">
+                    <div class="game-header">
+                        <div class="bingo-count">빙고: <span id="bingo-count">0</span> 줄</div>
+                        <div class="turn-info" id="turn-info">내 차례</div>
+                        <div class="score">점수: <span id="current-score">0</span></div>
+                    </div>
+                    
+                    <div class="bingo-content">
+                        <div class="bingo-board" id="bingo-board"></div>
+                    </div>
+                </div>
+            `;
+
+            const numbers = Array.from({ length: 25 }, (_, i) => i + 1)
+                .sort(() => Math.random() - 0.5);
+
+            const board = document.getElementById('bingo-board');
+
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                cell.textContent = numbers[i];
+                cell.dataset.number = numbers[i];
+                cell.onclick = () => selectNumber(numbers[i], cell);
+                board.appendChild(cell);
+            }
+
+            const selectedNumbers = new Set();
+
+            const selectNumber = (number, cell) => {
+                if (selectedNumbers.has(number)) return;
+                
+                selectedNumbers.add(number);
+                cell.classList.add('selected');
+
+                const bingoCount = checkBingo();
+                document.getElementById('bingo-count').textContent = bingoCount;
+
+                if (bingoCount >= 5) {
+                    setTimeout(() => {
+                        endGame(1000);
+                    }, 500);
+                }
+            };
+
+            const checkBingo = () => {
+                let count = 0;
+
+                for (let i = 0; i < 5; i++) {
+                    let complete = true;
+                    for (let j = 0; j < 5; j++) {
+                        const num = numbers[i * 5 + j];
+                        if (!selectedNumbers.has(num)) {
+                            complete = false;
+                            break;
+                        }
+                    }
+                    if (complete) count++;
+                }
+
+                for (let i = 0; i < 5; i++) {
+                    let complete = true;
+                    for (let j = 0; j < 5; j++) {
+                        const num = numbers[j * 5 + i];
+                        if (!selectedNumbers.has(num)) {
+                            complete = false;
+                            break;
+                        }
+                    }
+                    if (complete) count++;
+                }
+
+                let diag1 = true;
+                for (let i = 0; i < 5; i++) {
+                    if (!selectedNumbers.has(numbers[i * 5 + i])) {
+                        diag1 = false;
+                        break;
+                    }
+                }
+                if (diag1) count++;
+
+                let diag2 = true;
+                for (let i = 0; i < 5; i++) {
+                    if (!selectedNumbers.has(numbers[i * 5 + (4 - i)])) {
+                        diag2 = false;
+                        break;
+                    }
+                }
+                if (diag2) count++;
+
+                return count;
+            };
+        }
+
+        async function endGame(score) {
+            await updateGameStats(score);
+            showResults(score);
+        }
+
+        async function updateGameStats(score) {
+            try {
+                const userRef = ref(database, `users/${AppState.currentUser.uid}`);
+                const snapshot = await get(userRef);
+                const userData = snapshot.val();
+
+                const gamesPlayed = (userData.stats.gamesPlayed || 0) + 1;
+                const totalScore = (userData.profile.totalScore || 0) + score;
+                const currentExp = userData.profile.exp || 0;
+                const currentLevel = userData.profile.level || 1;
+
+                const newExp = currentExp + 60;
+                const expNeeded = Math.floor(100 * currentLevel * 1.2);
+                
+                let newLevel = currentLevel;
+                let finalExp = newExp;
+                
+                if (newExp >= expNeeded) {
+                    newLevel = currentLevel + 1;
+                    finalExp = newExp - expNeeded;
+                }
+
+                await update(userRef, {
+                    'stats/gamesPlayed': gamesPlayed,
+                    'profile/totalScore': totalScore,
+                    'profile/exp': finalExp,
+                    'profile/level': newLevel,
+                    'profile/gameMoney': (userData.profile.gameMoney || 0) + 600
+                });
+
+                if (score > 0) {
+                    await update(userRef, {
+                        'stats/gamesWon': (userData.stats.gamesWon || 0) + 1
+                    });
+                    await updateMissionProgress('win', 1);
+                }
+
+                await updateMissionProgress('game', 1);
+
+            } catch (error) {
+                console.error('결과 저장 오류:', error);
+            }
+        }
+
+        function showResults(score) {
+            showScreen('result');
+            
+            const resultContent = document.getElementById('result-content');
+            resultContent.innerHTML = `
+                <div class="result-rank first-place">
+                    🏆 1위
+                </div>
+                <div class="result-score">
+                    <div class="score-label">획득 점수</div>
+                    <div class="score-value">${score.toLocaleString()}</div>
+                </div>
+                <div class="result-rewards">
+                    <h3>보상</h3>
+                    <div class="reward-item">💰 +600 코인</div>
+                    <div class="reward-item">⭐ +60 경험치</div>
+                </div>
+            `;
+
+            updateUserInfo();
+            loadRanking();
+        }
+
+        async function handleLogout() {
+            if (confirm('정말 로그아웃하시겠습니까?')) {
+                try {
+                    await auth.signOut();
+                    AppState.currentUser = null;
+                    showScreen('login');
+                    document.getElementById('nickname-input').value = '';
+                } catch (error) {
+                    console.error('로그아웃 오류:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
